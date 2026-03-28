@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Taps">
+<meta name="theme-color" content="#080808">
+<title>Taps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@200;300;400;500&family=Geist:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #080808;
+  --bg1:   #0d0d0d;
+  --bg2:   #141414;
+  --bg3:   #1c1c1c;
+  --line:  #1e1e1e;
+  --line2: #272727;
+  --muted: #3a3a3a;
+  --sub:   #5a5a5a;
+  --mid:   #888;
+  --text:  #ddd;
+  --bright:#fff;
+  --accent:#bd6813;
+  --red:   #ff5050;
+  --green: #4ade80;
+  --mono:  'Geist Mono', monospace;
+  --sans:  'Geist', sans-serif;
+  --st: env(safe-area-inset-top,0px);
+  --sb: env(safe-area-inset-bottom,0px);
+  --sl: env(safe-area-inset-left,0px);
+  --sr: env(safe-area-inset-right,0px);
+  --col: 600px;
+  --ph: 36px;
+}
+@media(max-width:600px){ :root{ --ph:20px } }
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+html,body{height:100%;overflow:hidden;font-family:var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:var(--mono);outline:none;border:none;background:none;color:var(--text)}
+
+/* screens — full viewport */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;transition:opacity .22s,transform .22s;will-change:opacity,transform}
+.screen[data-state="hidden"]{opacity:0;pointer-events:none;transform:translateY(10px)}
+.screen[data-state="visible"]{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* centered column */
+.col{width:100%;max-width:var(--col);margin:0 auto;padding-left:var(--ph);padding-right:var(--ph)}
+
+/* ── loading ── */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;z-index:999;transition:opacity .3s}
+#loading.out{opacity:0;pointer-events:none}
+.ld-mark{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:1}}
+#ld-err{font-family:var(--mono);font-size:12px;color:var(--sub);text-align:center;line-height:1.8;max-width:280px;display:none;white-space:pre-wrap}
+
+/* ── shared fields ── */
+.field{position:relative;border:1px solid var(--line2);border-radius:10px;transition:border-color .15s}
+.field:focus-within{border-color:var(--accent)}
+.flabel{position:absolute;top:11px;left:15px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);pointer-events:none}
+.finput{width:100%;height:64px;padding:28px 15px 10px;font-size:15px;font-weight:300;background:var(--bg1);border-radius:10px;color:var(--text)}
+.finput::placeholder{color:var(--muted)}
+.pbtn{width:100%;height:56px;border-radius:12px;background:var(--accent);color:#0a0a0a;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;transition:opacity .12s,transform .1s;display:flex;align-items:center;justify-content:center}
+.pbtn:active{opacity:.8;transform:scale(.98)}
+.pbtn:disabled{opacity:.3;pointer-events:none}
+
+/* ── setup ── */
+#screen-setup{background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;align-items:center;padding:calc(var(--st) + 40px) 0 calc(var(--sb) + 40px)}
+.su-inner{width:100%;max-width:520px;padding:0 var(--ph);display:flex;flex-direction:column;gap:18px}
+.su-wm{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--sub)}
+.su-h{font-size:22px;font-weight:200;color:var(--text);line-height:1.3;margin-top:6px}
+.su-card{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:18px 20px}
+.su-ct{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.su-card p,.su-card li{font-size:13px;color:var(--sub);line-height:1.75}
+.su-card p{margin-bottom:6px}.su-card p:last-child{margin-bottom:0}
+.su-card code{background:var(--bg3);padding:2px 5px;border-radius:4px;color:var(--mid);font-family:var(--mono);font-size:10px}
+.su-card ol{padding-left:16px;display:flex;flex-direction:column;gap:4px}
+.su-err{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;min-height:14px}
+
+/* ── auth ── */
+#screen-config{background:var(--bg);align-items:center;justify-content:center}
+.au-inner{width:100%;max-width:400px;padding:0 var(--ph);display:flex;flex-direction:column;gap:20px}
+.au-wm{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--sub)}
+.au-h{font-size:26px;font-weight:200;color:var(--bright);letter-spacing:-.01em;margin-top:8px}
+.au-sub{font-size:13px;color:var(--sub);line-height:1.65}
+.au-err{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;min-height:14px}
+.au-sw{font-size:12px;color:var(--sub);text-align:center}
+.au-sw span{color:var(--mid);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* ── home ── */
+#screen-home{background:var(--bg)}
+.hm-topbar{flex-shrink:0;border-bottom:1px solid var(--line)}
+.hm-topbar-inner{display:flex;justify-content:space-between;align-items:center;padding-top:calc(var(--st) + 16px);padding-bottom:16px}
+.wordmark{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--sub)}
+.tr{display:flex;gap:8px;align-items:center}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background .4s}
+.sync-dot.syncing{background:var(--accent);animation:blink .8s ease-in-out infinite}
+.sync-dot.synced{background:var(--green)}
+.sync-dot.error{background:var(--red)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--sub);transition:border-color .15s,color .15s}
+.icon-btn:active{border-color:var(--mid);color:var(--text)}
+
+.hm-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hm-scroll::-webkit-scrollbar{display:none}
+
+.hero{padding:48px 0 40px}
+.hero-ey{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:10px}
+.hero-n{font-family:var(--mono);font-size:clamp(56px,9vw,92px);font-weight:200;color:var(--bright);line-height:.95;letter-spacing:-.04em}
+.hero-s{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--sub);letter-spacing:.02em}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:44px}
+.sc{padding:18px 0;display:flex;flex-direction:column;gap:5px;border-right:1px solid var(--line)}
+.sc:last-child{border-right:none}
+.sc:not(:first-child){padding-left:18px}
+.sc-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub)}
+.sc-val{font-family:var(--mono);font-size:20px;font-weight:300;color:var(--text);letter-spacing:-.02em}
+.sc-sub{font-family:var(--mono);font-size:9px;color:var(--muted)}
+
+.sec-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:14px}
+
+/* heatmap — bleeds to edges */
+.hm-scroll-x{
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  padding-bottom:6px;
+  width:100%;
+}
+.hm-scroll-x::-webkit-scrollbar{display:none}
+.hm-years{
+  display:flex;
+  gap:22px;
+  width:max-content;
+  padding:0 var(--ph);
+  margin:0 auto;
+}
+.hm-yb{display:flex;flex-direction:column;flex-shrink:0}
+.hm-ylbl{font-family:var(--mono);font-size:9px;color:var(--sub);letter-spacing:.06em;margin-bottom:7px}
+.hm-mr{position:relative;height:13px;margin-bottom:4px}
+.hm-ml{position:absolute;font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
+.hm-g{display:flex;gap:3px}
+.hm-c{display:flex;flex-direction:column;gap:3px}
+.hm-cell{width:12px;height:12px;border-radius:2.5px;background:var(--bg2);flex-shrink:0;transition:background .15s}
+.hm-cell[data-l="1"]{background:rgba(232,255,110,.13)}
+.hm-cell[data-l="2"]{background:rgba(232,255,110,.33)}
+.hm-cell[data-l="3"]{background:rgba(232,255,110,.60)}
+.hm-cell[data-l="4"]{background:rgba(232,255,110,.90)}
+.hm-cell[data-today]{outline:1.5px solid rgba(232,255,110,.5);outline-offset:1.5px}
+.hm-cell[data-future]{opacity:0;pointer-events:none}
+.hm-leg{display:flex;align-items:center;gap:6px;margin-top:10px;margin-bottom:44px}
+.hm-leg-t{font-family:var(--mono);font-size:9px;color:var(--muted)}
+
+.rec-list{display:flex;flex-direction:column;margin-bottom:24px}
+.rec-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.rec-item:last-child{border-bottom:none}
+.rec-date{font-family:var(--mono);font-size:11px;color:var(--sub)}
+.rec-cnt{font-family:var(--mono);font-size:14px;color:var(--text)}
+
+.start-area{flex-shrink:0;border-top:1px solid var(--line);padding-top:16px;padding-bottom:calc(var(--sb) + 20px)}
+.start-btn{width:100%;height:58px;border-radius:13px;background:var(--accent);color:#0a0a0a;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .1s,opacity .12s}
+.start-btn:active{transform:scale(.975);opacity:.85}
+.res-hint{text-align:center;font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.06em;margin-top:10px;min-height:14px}
+
+/* ── counter — TRUE full viewport, no centering ── */
+#screen-counter{background:#000;touch-action:none;overflow:hidden}
+.ctr{display:flex;flex-direction:column;width:100%;height:100%}
+.ctr-bar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:calc(var(--st) + 20px) 28px 16px}
+.ctr-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.18)}
+.ctr-done{height:38px;padding:0 22px;border-radius:100px;border:1px solid rgba(255,255,255,.14);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.38);transition:border-color .15s,color .15s,background .15s}
+.ctr-done:active{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.07)}
+.ctr-tap{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.ctr-num{font-family:var(--mono);font-size:clamp(88px,22vw,160px);font-weight:200;color:#fff;line-height:1;letter-spacing:-.05em;pointer-events:none;transition:transform .07s cubic-bezier(.34,1.56,.64,1);will-change:transform;text-align:center}
+.ctr-num.pulse{transform:scale(1.055)}
+.ctr-hint{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.09);margin-top:24px;pointer-events:none}
+.ctr-foot{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding-bottom:calc(var(--sb) + 24px);height:calc(var(--sb) + 56px)}
+.ctr-sync{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.1);transition:color .3s}
+.ctr-sync.syncing{color:rgba(232,255,110,.45)}
+.ripple{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(232,255,110,.055) 0%,transparent 70%);pointer-events:none;transform:scale(0);animation:rout .55s ease-out forwards}
+@keyframes rout{to{transform:scale(1);opacity:0}}
+
+/* ── settings ── */
+#screen-settings{background:var(--bg)}
+.sb-bar{flex-shrink:0;border-bottom:1px solid var(--line)}
+.sb-bar-in{display:flex;align-items:center;gap:14px;padding-top:calc(var(--st) + 16px);padding-bottom:16px}
+.back-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--sub);transition:border-color .15s,color .15s;flex-shrink:0}
+.back-btn:active{border-color:var(--mid);color:var(--text)}
+.sb-title{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--sub)}
+.sb-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:calc(var(--sb) + 32px)}
+.sb-body::-webkit-scrollbar{display:none}
+.sg{padding-top:32px;margin-bottom:4px}
+.sg-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:10px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.srow:last-child{border-bottom:none}
+.srow:active .srow-l{color:var(--bright)}
+.srow-l{font-size:14px;font-weight:300;color:var(--mid);transition:color .1s}
+.srow-v{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.srow-v.danger{color:var(--red)}
+.u-row{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.u-av{width:38px;height:38px;border-radius:50%;background:var(--bg3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:var(--mid);flex-shrink:0;text-transform:uppercase}
+.u-name{font-family:var(--mono);font-size:13px;color:var(--text)}
+.u-tag{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:2px}
+
+/* ── toast ── */
+#toast{position:fixed;bottom:calc(var(--sb) + 80px);left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg3);border:1px solid var(--line2);border-radius:100px;padding:10px 22px;font-family:var(--mono);font-size:11px;color:var(--mid);letter-spacing:.08em;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:1000}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── sheet ── */
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;opacity:0;pointer-events:none;transition:opacity .22s;display:flex;align-items:flex-end}
+.ovl.open{opacity:1;pointer-events:all}
+.sheet{width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:28px var(--ph) calc(var(--sb) + 28px);transform:translateY(100%);transition:transform .28s cubic-bezier(.22,.68,0,1.12);border-top:1px solid var(--line2);max-width:100%}
+.ovl.open .sheet{transform:translateY(0)}
+.sh-title{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:8px}
+.sh-body{font-size:14px;font-weight:300;color:var(--sub);line-height:1.7;margin-bottom:24px}
+.sh-btns{display:flex;gap:10px}
+.sh-btn{flex:1;height:52px;border-radius:12px;border:1px solid var(--line2);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);transition:opacity .15s}
+.sh-btn:active{opacity:.65}
+.sh-btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.sh-btn.ok{background:var(--accent);border-color:var(--accent);color:#0a0a0a;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <span class="ld-mark">Taps</span>
+  <div id="ld-err"></div>
+</div>
+
+<!-- SETUP -->
+<div class="screen" id="screen-setup" data-state="hidden">
+  <div class="su-inner" style="margin:auto">
+    <div>
+      <div class="su-wm">Taps</div>
+      <h1 class="su-h">Firebase setup</h1>
+    </div>
+    <div class="su-card">
+      <div class="su-ct">Step 1 — Create Firebase project</div>
+      <ol>
+        <li>Go to <strong>console.firebase.google.com</strong> → Add project → name it "taps"</li>
+        <li>Build → Authentication → Get started → enable <strong>Email/Password</strong></li>
+        <li>Build → Firestore Database → Create database → production mode</li>
+      </ol>
+    </div>
+    <div class="su-card">
+      <div class="su-ct">Step 2 — Firestore security rules</div>
+      <p>In Firestore → Rules, paste and publish:</p>
+      <p><code>rules_version = '2';<br>service cloud.firestore {<br>&nbsp;&nbsp;match /databases/{db}/documents {<br>&nbsp;&nbsp;&nbsp;&nbsp;match /taps/{userId}/{doc=**} {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if request.auth.uid == userId;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}</code></p>
+    </div>
+    <div class="su-card">
+      <div class="su-ct">Step 3 — Paste your config</div>
+      <ol>
+        <li>Gear → Project settings → Your apps → Add app → Web</li>
+        <li>Copy the three values from your <code>firebaseConfig</code></li>
+      </ol>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="field"><label class="flabel">API Key</label><input class="finput" id="su-key" type="text" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label class="flabel">Auth Domain</label><input class="finput" id="su-dom" type="text" placeholder="your-project.firebaseapp.com" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label class="flabel">Project ID</label><input class="finput" id="su-pid" type="text" placeholder="your-project-id" autocomplete="off" spellcheck="false"></div>
+    </div>
+    <div class="su-err" id="su-err"></div>
+    <button class="pbtn" id="su-save">Save & Continue</button>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div class="screen" id="screen-config" data-state="hidden">
+  <div class="au-inner">
+    <div>
+      <div class="au-wm">Taps</div>
+      <h1 class="au-h" id="au-h">Sign in</h1>
+    </div>
+    <p class="au-sub" id="au-sub">Same account across all your devices.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="field"><label class="flabel">Username</label><input class="finput" id="f-user" type="text" placeholder="yourname" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+      <div class="field"><label class="flabel">Password</label><input class="finput" id="f-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    </div>
+    <div class="au-err" id="au-err"></div>
+    <button class="pbtn" id="au-btn">Sign In</button>
+    <p class="au-sw" id="au-sw">No account? <span id="au-sw-lnk">Create one</span></p>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="screen-home" data-state="hidden">
+
+  <div class="hm-topbar">
+    <div class="col hm-topbar-inner">
+      <span class="wordmark">Taps</span>
+      <div class="tr">
+        <div class="sync-dot" id="sync-dot"></div>
+        <button class="icon-btn" id="btn-settings">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="2"/><path d="M7 1v1.2M7 11.8V13M1 7h1.2M11.8 7H13M2.76 2.76l.85.85M10.39 10.39l.85.85M2.76 11.24l.85-.85M10.39 3.61l.85-.85"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hm-scroll">
+    <div class="col">
+      <div class="hero">
+        <div class="hero-ey">Total all time</div>
+        <div class="hero-n" id="hero-n">0</div>
+        <div class="hero-s" id="hero-s">start counting to track your taps</div>
+      </div>
+      <div class="stats">
+        <div class="sc">
+          <div class="sc-lbl">Avg / day</div>
+          <div class="sc-val" id="s-avg">—</div>
+          <div class="sc-sub">active days</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Best day</div>
+          <div class="sc-val" id="s-best">—</div>
+          <div class="sc-sub" id="s-best-d">—</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Streak</div>
+          <div class="sc-val" id="s-streak">0</div>
+          <div class="sc-sub">days</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="sec-lbl">Activity</div>
+
+        <select id="year-select"
+        style="
+        background:var(--bg2);
+        border:1px solid var(--line2);
+        color:var(--text);
+        font-family:var(--mono);
+        font-size:11px;
+        padding:6px 10px;
+        border-radius:6px;
+        ">
+        </select>
+      </div>
+    </div>
+
+    <!-- heatmap bleeds full width -->
+    <div class="hm-scroll-x" id="hm-sx">
+      <div class="hm-years" id="hm-years"></div>
+    </div>
+
+    <div class="col">
+      <div class="hm-leg">
+        <span class="hm-leg-t">Less</span>
+        <div style="display:flex;gap:3px">
+          <div class="hm-cell"></div>
+          <div class="hm-cell" data-l="1"></div>
+          <div class="hm-cell" data-l="2"></div>
+          <div class="hm-cell" data-l="3"></div>
+          <div class="hm-cell" data-l="4"></div>
+        </div>
+        <span class="hm-leg-t">More</span>
+      </div>
+      <div class="sec-lbl">Recent</div>
+      <div class="rec-list" id="rec-list"></div>
+    </div>
+  </div>
+
+  <div class="start-area">
+    <div class="col">
+      <button class="start-btn" id="btn-start">
+        <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+        <span id="btn-start-lbl">Start Counting</span>
+      </button>
+      <div class="res-hint" id="res-hint"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COUNTER -->
+<div class="screen" id="screen-counter" data-state="hidden">
+  <div class="ctr">
+    <div class="ctr-bar">
+      <span class="ctr-lbl" id="ctr-date">—</span>
+      <button class="ctr-done" id="btn-done">Done</button>
+    </div>
+    <div class="ctr-tap" id="tap-zone">
+      <div class="ctr-num" id="ctr-num">0</div>
+      <div class="ctr-hint">tap anywhere</div>
+    </div>
+    <div class="ctr-foot">
+      <button id="btn-ninja"
+      style="
+      position:absolute;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.12);
+      background:transparent;
+      color:rgba(255,255,255,.4);
+      font-size:12px;
+      ">
+      ◉
+      </button>
+      <div class="ctr-sync" id="ctr-sync">synced</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings" data-state="hidden">
+  <div class="sb-bar">
+    <div class="col sb-bar-in">
+      <button class="back-btn" id="btn-back">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L4 7l5 5"/></svg>
+      </button>
+      <span class="sb-title">Settings</span>
+    </div>
+  </div>
+  <div class="sb-body">
+    <div class="col">
+      <div class="sg">
+        <div class="sg-lbl">Account</div>
+        <div class="u-row">
+          <div class="u-av" id="s-av">—</div>
+          <div><div class="u-name" id="s-un">—</div><div class="u-tag">signed in</div></div>
+        </div>
+        <div class="srow" id="btn-signout">
+          <span class="srow-l">Sign out</span>
+          <span class="srow-v danger">→</span>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sg-lbl">Data</div>
+        <div class="srow" id="btn-export">
+          <span class="srow-l">Export data</span>
+          <span class="srow-v">JSON →</span>
+        </div>
+      </div>
+      <div class="sg">
+        <div class="sg-lbl">Config</div>
+        <div class="srow" id="btn-reconfig">
+          <span class="srow-l">Change Firebase config</span>
+          <span class="srow-v">Edit →</span>
+        </div>
+        <div class="srow" style="cursor:default">
+          <span class="srow-l">Version</span>
+          <span class="srow-v">2.0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="ovl" id="ovl">
+  <div class="sheet">
+    <div class="sh-title" id="sh-title">Confirm</div>
+    <div class="sh-body" id="sh-body">Are you sure?</div>
+    <div class="sh-btns">
+      <button class="sh-btn" id="sh-cancel">Cancel</button>
+      <button class="sh-btn danger" id="sh-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const tip=document.getElementById('hm-tip')
+const tipVal=document.getElementById('hm-tip-val')
+const tipDate=document.getElementById('hm-tip-date')
+let ninja=false
+function showTip(x,y,val,date){
+  tipVal.textContent=val
+  tipDate.textContent=date
+
+  tip.style.left=(x+12)+'px'
+  tip.style.top=(y-28)+'px'
+  tip.style.opacity=1
+}
+
+function hideTip(){
+  tip.style.opacity=0
+}
+
+const ninjaBtn=document.getElementById('btn-ninja')
+
+ninjaBtn.onclick=()=>{
+
+  ninja=!ninja
+
+  const num=document.getElementById('ctr-num')
+  const done=document.getElementById('btn-done')
+
+  if(ninja){
+    num.style.opacity=0
+    done.style.opacity=0
+    done.style.pointerEvents="none"
+
+  }else{
+    num.style.opacity=1
+    done.style.opacity=1
+    done.style.pointerEvents="auto"
+  }
+
+}
+
+const CFG_KEY='taps_cfg_v2', SESS_KEY='taps_sess_v2';
+const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function lcfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY))||null}catch{return null}}
+function scfg(c){try{localStorage.setItem(CFG_KEY,JSON.stringify(c))}catch{}}
+function ccfg(){try{localStorage.removeItem(CFG_KEY)}catch{}}
+
+let fb=null,auth=null,db=null,cu=null,cun=null;
+let cache={days:{},total:0};
+let sess={count:0,startedDate:null};
+let st=null;
+
+function tkey(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`}
+function p2(n){return String(n).padStart(2,'0')}
+function fmt(n){return isNaN(n)||n==null?'0':Number(n).toLocaleString('en-IN')}
+function rd(k){
+  const[y,m,d]=k.split('-').map(Number);
+  const dt=new Date(y,m-1,d),now=new Date();now.setHours(0,0,0,0);
+  const df=Math.round((now-dt)/86400000);
+  return df===0?'Today':df===1?'Yesterday':dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function ssess(){try{localStorage.setItem(SESS_KEY,JSON.stringify(sess))}catch{}}
+function lsess(){try{const r=localStorage.getItem(SESS_KEY);if(r){const s=JSON.parse(r);if(s&&typeof s.count==='number')sess=s}}catch{}}
+function csess(){try{localStorage.removeItem(SESS_KEY)}catch{}}
+
+let _tt;
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),2400)}
+
+let _scb=null;
+function sheet(title,body,label,danger,cb){
+  document.getElementById('sh-title').textContent=title;
+  document.getElementById('sh-body').textContent=body;
+  const b=document.getElementById('sh-ok');b.textContent=label;b.className='sh-btn '+(danger?'danger':'ok');
+  document.getElementById('ovl').classList.add('open');_scb=cb;
+}
+document.getElementById('sh-cancel').onclick=()=>document.getElementById('ovl').classList.remove('open');
+document.getElementById('sh-ok').onclick=()=>{document.getElementById('ovl').classList.remove('open');if(_scb)_scb()};
+document.getElementById('ovl').onclick=e=>{if(e.target===e.currentTarget)document.getElementById('ovl').classList.remove('open')};
+
+const SCRS=['setup','config','home','counter','settings'];
+function show(n){SCRS.forEach(s=>{document.getElementById('screen-'+s).dataset.state=s===n?'visible':'hidden'})}
+
+document.getElementById('su-save').onclick=async()=>{
+  const k=document.getElementById('su-key').value.trim();
+  const a=document.getElementById('su-dom').value.trim();
+  const p=document.getElementById('su-pid').value.trim();
+  const e=document.getElementById('su-err');e.textContent='';
+  if(!k||!a||!p){e.textContent='All fields required.';return}
+  if(!k.startsWith('AIza')){e.textContent='API key should start with AIza...';return}
+  scfg({apiKey:k,authDomain:a,projectId:p});
+  if(initFB({apiKey:k,authDomain:a,projectId:p})){hideLoad();show('config')}
+  else e.textContent='Could not initialise. Check your keys.';
+};
+
+function initFB(cfg){
+  try{fb=initializeApp(cfg,'taps');auth=getAuth(fb);db=getFirestore(fb);return true}
+  catch(e){console.error(e);return false}
+}
+
+let amode='signin';
+function email2u(e){return e.replace('@taps.local','')}
+function u2email(u){return u.toLowerCase().replace(/[^a-z0-9_-]/g,'')+'@taps.local'}
+
+function setAmode(m){
+  amode=m;
+  document.getElementById('au-h').textContent=m==='signin'?'Sign in':'Create account';
+  document.getElementById('au-sub').textContent=m==='signin'?'Same account across all your devices.':'Choose a username and password.';
+  document.getElementById('au-btn').textContent=m==='signin'?'Sign In':'Create Account';
+  document.getElementById('au-sw').innerHTML=m==='signin'?'No account? <span id="au-sw-lnk">Create one</span>':'Already have one? <span id="au-sw-lnk">Sign in</span>';
+  document.getElementById('au-sw-lnk').onclick=()=>setAmode(m==='signin'?'signup':'signin');
+  document.getElementById('au-err').textContent='';
+}
+document.getElementById('au-sw-lnk').onclick=()=>setAmode('signup');
+document.getElementById('au-btn').onclick=doAuth;
+['f-user','f-pass'].forEach(id=>{document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doAuth()})});
+
+async function doAuth(){
+  const u=document.getElementById('f-user').value.trim();
+  const p=document.getElementById('f-pass').value;
+  const e=document.getElementById('au-err');e.textContent='';
+  if(!u||u.length<2){e.textContent='Username needs 2+ characters.';return}
+  if(/[^a-zA-Z0-9_-]/.test(u)){e.textContent='Letters, numbers, _ and - only.';return}
+  if(!p||p.length<6){e.textContent='Password needs 6+ characters.';return}
+  const btn=document.getElementById('au-btn');btn.disabled=true;btn.textContent=amode==='signin'?'Signing in…':'Creating…';
+  try{
+    const em=u2email(u);
+    const r=amode==='signin'?await signInWithEmailAndPassword(auth,em,p):await createUserWithEmailAndPassword(auth,em,p);
+    cu=r.user;cun=u;await afterLogin();
+  }catch(err){
+    let msg=err.message||'Something went wrong.';
+    if(msg.includes('user-not-found')||msg.includes('wrong-password')||msg.includes('invalid-credential'))msg='Wrong username or password.';
+    if(msg.includes('email-already-in-use'))msg='Username taken — try signing in.';
+    if(msg.includes('weak-password'))msg='Password too weak.';
+    if(msg.includes('too-many-requests'))msg='Too many attempts. Wait a bit.';
+    e.textContent=msg;btn.disabled=false;btn.textContent=amode==='signin'?'Sign In':'Create Account';
+  }
+}
+
+async function afterLogin(){lsess();await pull();renderHome();hideLoad();show('home')}
+
+async function pull(){
+  if(!db||!cu)return;
+  setSS('syncing');
+  try{
+    const snap=await getDocs(collection(db,'taps',cu.uid,'days'));
+    const days={};let total=0;
+    snap.forEach(d=>{const c=Number(d.data().count)||0;days[d.id]=c;total+=c});
+    cache.days=days;cache.total=total;setSS('synced');
+  }catch(e){console.error(e);setSS('error')}
+}
+
+async function push(dk,count){
+  if(!db||!cu||count<=0)return;
+  setSS('syncing');
+  try{await setDoc(doc(db,'taps',cu.uid,'days',dk),{count});setSS('synced')}
+  catch(e){console.error(e);setSS('error');toast('Sync failed — saved locally')}
+}
+
+function setSS(s){
+  document.getElementById('sync-dot').className='sync-dot '+s;
+  const sl=document.getElementById('ctr-sync');sl.className='ctr-sync '+(s==='syncing'?'syncing':'');
+  sl.textContent=s==='syncing'?'syncing…':s==='error'?'sync error':'synced';
+}
+
+function schedSync(){clearTimeout(st);st=setTimeout(()=>ssess(),3000)}
+
+function renderHome(){
+  const today=tkey();
+  const vd={...cache.days};
+  if(sess.count>0){const k=sess.startedDate||today;vd[k]=(vd[k]||0)+sess.count}
+  const vt=cache.total+sess.count;
+  const active=Object.keys(vd).filter(k=>vd[k]>0);
+  const nd=active.length;
+  document.getElementById('hero-n').textContent=fmt(vt);
+  document.getElementById('hero-s').textContent=nd>0?`across ${nd} active day${nd>1?'s':''}`:'start counting to track your taps';
+  const avg=nd>0?Math.round(vt/nd):null;
+  document.getElementById('s-avg').textContent=avg!=null?fmt(avg):'—';
+  let bk=null,bv=0;active.forEach(k=>{if(vd[k]>bv){bv=vd[k];bk=k}});
+  document.getElementById('s-best').textContent=bk?fmt(bv):'—';
+  document.getElementById('s-best-d').textContent=bk?rd(bk):'—';
+  document.getElementById('s-streak').textContent=streak(vd);
+  document.getElementById('btn-start-lbl').textContent=sess.count>0?'Resume':'Start Counting';
+  document.getElementById('res-hint').textContent=sess.count>0?`${fmt(sess.count)} in progress`:'';
+  populateYears(vd)
+  renderHM(vd);renderRec(vd);
+}
+
+function streak(vd){
+  let s=0;const d=new Date();d.setHours(0,0,0,0);
+  while(true){const k=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;if(vd[k]>0){s++;d.setDate(d.getDate()-1)}else break}
+  return s;
+}
+
+function renderHM(vd, selectedYear=null){
+  const wrap=document.getElementById('hm-years');wrap.innerHTML='';
+  const today=new Date();today.setHours(0,0,0,0);const todayStr=tkey();
+  const keys=Object.keys(vd).filter(k=>vd[k]>0);
+  const fy=2025
+  const cy=today.getFullYear();
+  const mx=Math.max(...Object.values(vd).filter(v=>v>0),1);
+  const year = selectedYear || cy;
+  {
+    const blk=document.createElement('div');blk.className='hm-yb';
+    const yl=document.createElement('div');yl.className='hm-ylbl';yl.textContent=String(year);blk.appendChild(yl);
+    const mr=document.createElement('div');mr.className='hm-mr';blk.appendChild(mr);
+    const gd=document.createElement('div');gd.className='hm-g';blk.appendChild(gd);
+    const j=new Date(year,0,1);const st2=new Date(j);st2.setDate(st2.getDate()-st2.getDay());
+    const ye=year<cy?new Date(year,11,31):today;const en=new Date(ye);en.setDate(en.getDate()+(6-en.getDay()));
+    const tw=Math.ceil((en-st2)/86400000/7)+1;
+    let lm=-1;
+    for(let w=0;w<tw;w++){
+      const col=document.createElement('div');col.className='hm-c';
+      for(let d2=0;d2<7;d2++){
+        const dt=new Date(st2);dt.setDate(dt.getDate()+w*7+d2);
+        const k=`${dt.getFullYear()}-${p2(dt.getMonth()+1)}-${p2(dt.getDate())}`;
+        if(d2===0&&dt.getMonth()!==lm&&dt.getFullYear()===year){
+          lm=dt.getMonth();
+          const ml=document.createElement('span');ml.className='hm-ml';ml.textContent=MO[lm];ml.style.left=(w*15)+'px';mr.appendChild(ml);
+        }
+        const cell=document.createElement('div');cell.className='hm-cell';
+        const cnt=vd[k]||0;const fut=dt>today;const out=dt.getFullYear()!==year;
+        if(fut||out){cell.dataset.future=''}
+        else if(cnt>0){cell.dataset.l=cnt<mx*.25?1:cnt<mx*.5?2:cnt<mx*.75?3:4}
+        if(k===todayStr)cell.dataset.today='';
+        if(!fut && !out){
+          const val=cnt>0?fmt(cnt):'0'
+          const date=rd(k)
+
+          cell.onmousemove=(e)=>{
+            showTip(e.clientX,e.clientY,val,date)
+          }
+
+          cell.onmouseleave=hideTip
+        }
+        if(!fut && !out){
+          cell.style.cursor='pointer'
+          cell.onclick=()=>{
+            const val=prompt(`Edit taps for ${k}`,vd[k]||0)
+            if(val===null) return
+
+            const num=parseInt(val)||0
+
+            cache.days[k]=num
+
+            cache.total=Object.values(cache.days).reduce((a,b)=>a+b,0)
+
+            renderHome()
+
+            if(cu){
+              setDoc(doc(db,'taps',cu.uid,'days',k),{count:num})
+            }
+          }
+        }
+        col.appendChild(cell);
+      }
+      gd.appendChild(col);
+    }
+    wrap.appendChild(blk);
+  }
+  requestAnimationFrame(()=>{const s=document.getElementById('hm-sx');if(s)s.scrollLeft=s.scrollWidth});
+}
+
+function populateYears(vd){
+  const sel=document.getElementById('year-select')
+  sel.innerHTML=''
+
+  const cy=new Date().getFullYear()
+
+  for(let y=cy; y>=2025; y--){
+    const o=document.createElement('option')
+    o.value=y
+    o.textContent=y
+    sel.appendChild(o)
+  }
+
+  sel.value=cy
+
+  sel.onchange=()=>{
+    renderHM(vd,parseInt(sel.value))
+  }
+}
+
+function renderRec(vd){
+  const list=document.getElementById('rec-list');
+  const entries=Object.entries(vd).filter(([,v])=>v>0).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,3);
+  if(!entries.length){list.innerHTML=`<div class="rec-item"><span class="rec-date" style="color:var(--muted)">No sessions yet</span></div>`;return}
+  list.innerHTML=entries.map(([k,v])=>`<div class="rec-item"><span class="rec-date">${rd(k)}</span><span class="rec-cnt">${fmt(v)}</span></div>`).join('');
+}
+
+let _pt=null,_th=false;
+function openCtr(){
+  if(!sess.startedDate)sess.startedDate=tkey();
+  const now=new Date();
+  document.getElementById('ctr-date').textContent=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('ctr-num').textContent=fmt(sess.count);
+  show('counter');
+}
+
+const tz=document.getElementById('tap-zone');
+tz.addEventListener('touchstart',onTap,{passive:false});
+tz.addEventListener('mousedown',e=>{if(_th)return;tap(1,e.clientX,e.clientY)});
+tz.addEventListener('touchstart',()=>{_th=true},{passive:true});
+tz.addEventListener('touchend',()=>{setTimeout(()=>{_th=false},400)},{passive:true});
+
+function onTap(e){e.preventDefault();const t=e.changedTouches;tap(t.length,t[0].clientX,t[0].clientY)}
+
+function tap(n,x,y){
+  sess.count+=n;
+  const el=document.getElementById('ctr-num');
+  el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');
+  clearTimeout(_pt);_pt=setTimeout(()=>el.classList.remove('pulse'),80);
+  el.textContent=fmt(sess.count);
+  ripple(x,y);schedSync();
+}
+
+function ripple(x,y){
+  const el=document.createElement('div');const sz=Math.max(window.innerWidth,window.innerHeight)*1.6;
+  el.className='ripple';el.style.cssText=`width:${sz}px;height:${sz}px;left:${x-sz/2}px;top:${y-sz/2}px`;
+  tz.appendChild(el);el.addEventListener('animationend',()=>el.remove(),{once:true});
+}
+
+document.getElementById('btn-done').onclick=async()=>{
+  clearTimeout(st);
+  if(sess.count===0){sess={count:0,startedDate:null};csess();show('home');renderHome();return}
+  const dk=sess.startedDate||tkey();const delta=sess.count;
+  const nc=(cache.days[dk]||0)+delta;
+  cache.days[dk]=nc;cache.total=(cache.total||0)+delta;
+  sess={count:0,startedDate:null};csess();
+  show('home');renderHome();toast(`+${fmt(delta)} saved`);
+  await push(dk,nc);
+};
+
+document.getElementById('btn-settings').onclick=()=>{
+  const u=cun||'—';
+  document.getElementById('s-un').textContent=u;
+  document.getElementById('s-av').textContent=u.charAt(0).toUpperCase();
+  show('settings');
+};
+document.getElementById('btn-back').onclick=()=>{show('home');renderHome()};
+document.getElementById('btn-start').onclick=openCtr;
+
+document.getElementById('btn-signout').onclick=()=>{
+  sheet('Sign out','Sign back in anytime with your username and password.','Sign Out',false,async()=>{
+    await signOut(auth);cache={days:{},total:0};sess={count:0,startedDate:null};csess();cu=null;cun=null;show('config');
+  });
+};
+
+document.getElementById('btn-reconfig').onclick=()=>{
+  sheet('Change config','This will clear your saved Firebase keys. You will need to re-enter them.','Continue',true,()=>{ccfg();location.reload()});
+};
+
+document.getElementById('btn-export').onclick=()=>{
+  const b=new Blob([JSON.stringify({exported:new Date().toISOString(),total:cache.total,days:cache.days},null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='taps-export.json';a.click();URL.revokeObjectURL(u);toast('Exported');
+};
+
+let _safety=setTimeout(()=>{
+  const m=document.querySelector('.ld-mark');m.style.animation='none';m.style.color='var(--red)';m.textContent='Connection failed';
+  const e=document.getElementById('ld-err');e.style.display='block';e.textContent='Check your Firebase config\nor internet connection.';
+  setTimeout(()=>{hideLoad();show('config')},2000);
+},8000);
+
+function hideLoad(){
+  clearTimeout(_safety);
+  document.getElementById('loading').classList.add('out');
+}
+document.getElementById('loading').addEventListener('transitionend',()=>{document.getElementById('loading').style.display='none'});
+
+
+async function init(){ const cfg=lcfg(); if(!cfg){hideLoad();show('setup');return} if(!initFB(cfg)){hideLoad();show('setup');document.getElementById('su-err').textContent='Saved config invalid. Re-enter your keys.';return} onAuthStateChanged(auth,async user=>{ if(user){cu=user;cun=email2u(user.email);lsess();await pull();renderHome();hideLoad();show('home')} else{hideLoad();show('config')} }); document.addEventListener('visibilitychange',async()=>{ if(document.visibilityState==='visible'&&cu){await pull();renderHome()} }); }
+
+init();
+</script>
+<div id="hm-tip"
+style="
+position:fixed;
+pointer-events:none;
+background:#111;
+border:1px solid #222;
+border-radius:8px;
+padding:8px 10px;
+font-family:var(--mono);
+opacity:0;
+transition:opacity .12s;
+z-index:1000;
+">
+
+<div id="hm-tip-val"
+style="
+font-size:14px;
+color:white;
+line-height:1;
+"></div>
+
+<div id="hm-tip-date"
+style="
+font-size:10px;
+color:#777;
+margin-top:2px;
+"></div>
+
+</div>
+</body>
+</html>
