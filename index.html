@@ -334,8 +334,8 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
         <div class="sg-lbl">Data</div>
         <div class="srow" id="btn-export"><span class="srow-l">Export data</span><span class="srow-v">JSON →</span></div>
         <div class="srow" id="btn-email-backup">
-          <span class="srow-l">Email backup</span>
-          <span class="srow-v">Send →</span>
+          <span class="srow-l">Copy backup</span>
+          <span class="srow-v">Copy →</span>
         </div>
       </div>
       <div class="sg">
@@ -777,15 +777,7 @@ document.getElementById('btn-export').onclick=()=>{
   const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='taps-export.json';a.click();URL.revokeObjectURL(u);toast('Exported');
 };
 
-document.getElementById('btn-email-backup').onclick = () => {
-  let email = localStorage.getItem('taps_backup_email');
-  
-  if (!email) {
-    email = prompt('Enter your backup email:');
-    if (!email) return;
-    localStorage.setItem('taps_backup_email', email);
-  }
-
+document.getElementById('btn-email-backup').onclick = async () => {
   const vd = cache.days;
   const activeDays = Object.keys(vd).filter(k => vd[k] > 0);
   const nd = activeDays.length;
@@ -805,8 +797,12 @@ document.getElementById('btn-email-backup').onclick = () => {
     `Exported: ${new Date().toLocaleString()}`,
   ].join('\n');
 
-  const mailto = `mailto:${email}?subject=Counter Backup&body=${encodeURIComponent(summary)}`;
-  window.location.href = mailto;
+  try {
+    await navigator.clipboard.writeText(summary);
+    toast('Copied to clipboard');
+  } catch {
+    toast('Copy failed — try again');
+  }
 };
 
 let _safety=setTimeout(()=>{
