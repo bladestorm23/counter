@@ -1,0 +1,13 @@
+{
+  "name": "Taps",
+  "short_name": "Taps",
+  "start_url": "/app/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [{
+    "src": "app-icon.png",
+    "sizes": "180x180",
+    "type": "image/png"
+  }]
+}
