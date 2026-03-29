@@ -333,6 +333,10 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
       <div class="sg">
         <div class="sg-lbl">Data</div>
         <div class="srow" id="btn-export"><span class="srow-l">Export data</span><span class="srow-v">JSON →</span></div>
+        <div class="srow" id="btn-email-backup">
+          <span class="srow-l">Email backup</span>
+          <span class="srow-v">Send →</span>
+        </div>
       </div>
       <div class="sg">
         <div class="sg-lbl">Config</div>
@@ -771,6 +775,38 @@ document.getElementById('btn-reconfig').onclick=()=>{
 document.getElementById('btn-export').onclick=()=>{
   const b=new Blob([JSON.stringify({exported:new Date().toISOString(),total:cache.total,days:cache.days},null,2)],{type:'application/json'});
   const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='taps-export.json';a.click();URL.revokeObjectURL(u);toast('Exported');
+};
+
+document.getElementById('btn-email-backup').onclick = () => {
+  let email = localStorage.getItem('taps_backup_email');
+  
+  if (!email) {
+    email = prompt('Enter your backup email:');
+    if (!email) return;
+    localStorage.setItem('taps_backup_email', email);
+  }
+
+  const vd = cache.days;
+  const activeDays = Object.keys(vd).filter(k => vd[k] > 0);
+  const nd = activeDays.length;
+  const avg = nd > 0 ? Math.round(cache.total / nd) : 0;
+  let bestKey = null, bestVal = 0;
+  activeDays.forEach(k => { if (vd[k] > bestVal) { bestVal = vd[k]; bestKey = k; } });
+
+  const summary = [
+    'Counter Backup',
+    '',
+    `Total taps: ${fmt(cache.total)}`,
+    `Average/day: ${fmt(avg)}`,
+    `Best day: ${bestKey ? fmt(bestVal) + ' (' + rd(bestKey) + ')' : '—'}`,
+    `Current streak: ${streak(vd)} days`,
+    `Active days: ${nd}`,
+    '',
+    `Exported: ${new Date().toLocaleString()}`,
+  ].join('\n');
+
+  const mailto = `mailto:${email}?subject=Counter Backup&body=${encodeURIComponent(summary)}`;
+  window.location.href = mailto;
 };
 
 let _safety=setTimeout(()=>{
