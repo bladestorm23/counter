@@ -1,7 +1,7 @@
 {
   "name": "Taps",
   "short_name": "Taps",
-  "start_url": "/app/",
+  "start_url": "/counter/",
   "display": "standalone",
   "background_color": "#080808",
   "theme_color": "#080808",
