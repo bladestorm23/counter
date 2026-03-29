@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Taps">
+<meta name="apple-mobile-web-app-title" content="Counter">
 <meta name="theme-color" content="#080808">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23080808'/><circle cx='16' cy='16' r='8' fill='%23bd6813'/></svg>">
-<link rel="app-icon" href="app-icon.png">
+<link rel="apple-touch-icon" href="app-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>Counter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,34 +34,23 @@
   --sans:  'Geist', sans-serif;
   --st: env(safe-area-inset-top,0px);
   --sb: env(safe-area-inset-bottom,0px);
-  --sl: env(safe-area-inset-left,0px);
-  --sr: env(safe-area-inset-right,0px);
   --col: 600px;
   --ph: 36px;
 }
 @media(max-width:600px){ :root{ --ph:20px } }
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
 html,body{height:100%;overflow:hidden;font-family:var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input{font-family:var(--mono);outline:none;border:none;background:none;color:var(--text)}
-
-/* screens — full viewport */
 .screen{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;transition:opacity .22s,transform .22s;will-change:opacity,transform}
 .screen[data-state="hidden"]{opacity:0;pointer-events:none;transform:translateY(10px)}
 .screen[data-state="visible"]{opacity:1;pointer-events:all;transform:translateY(0)}
-
-/* centered column */
 .col{width:100%;max-width:var(--col);margin:0 auto;padding-left:var(--ph);padding-right:var(--ph)}
-
-/* ── loading ── */
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;z-index:999;transition:opacity .3s}
 #loading.out{opacity:0;pointer-events:none}
 .ld-mark{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.2}50%{opacity:1}}
 #ld-err{font-family:var(--mono);font-size:12px;color:var(--sub);text-align:center;line-height:1.8;max-width:280px;display:none;white-space:pre-wrap}
-
-/* ── shared fields ── */
 .field{position:relative;border:1px solid var(--line2);border-radius:10px;transition:border-color .15s}
 .field:focus-within{border-color:var(--accent)}
 .flabel{position:absolute;top:11px;left:15px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);pointer-events:none}
@@ -70,8 +59,6 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .pbtn{width:100%;height:56px;border-radius:12px;background:var(--accent);color:#0a0a0a;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;transition:opacity .12s,transform .1s;display:flex;align-items:center;justify-content:center}
 .pbtn:active{opacity:.8;transform:scale(.98)}
 .pbtn:disabled{opacity:.3;pointer-events:none}
-
-/* ── setup ── */
 #screen-setup{background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;align-items:center;padding:calc(var(--st) + 40px) 0 calc(var(--sb) + 40px)}
 .su-inner{width:100%;max-width:520px;padding:0 var(--ph);display:flex;flex-direction:column;gap:18px}
 .su-wm{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--sub)}
@@ -83,8 +70,6 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .su-card code{background:var(--bg3);padding:2px 5px;border-radius:4px;color:var(--mid);font-family:var(--mono);font-size:10px}
 .su-card ol{padding-left:16px;display:flex;flex-direction:column;gap:4px}
 .su-err{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;min-height:14px}
-
-/* ── auth ── */
 #screen-config{background:var(--bg);align-items:center;justify-content:center}
 .au-inner{width:100%;max-width:400px;padding:0 var(--ph);display:flex;flex-direction:column;gap:20px}
 .au-wm{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--sub)}
@@ -93,8 +78,6 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .au-err{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;min-height:14px}
 .au-sw{font-size:12px;color:var(--sub);text-align:center}
 .au-sw span{color:var(--mid);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-
-/* ── home ── */
 #screen-home{background:var(--bg)}
 .hm-topbar{flex-shrink:0;border-bottom:1px solid var(--line)}
 .hm-topbar-inner{display:flex;justify-content:space-between;align-items:center;padding-top:calc(var(--st) + 16px);padding-bottom:16px}
@@ -107,15 +90,12 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--sub);transition:border-color .15s,color .15s}
 .icon-btn:active{border-color:var(--mid);color:var(--text)}
-
 .hm-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .hm-scroll::-webkit-scrollbar{display:none}
-
 .hero{padding:48px 0 40px}
 .hero-ey{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:10px}
 .hero-n{font-family:var(--mono);font-size:clamp(56px,9vw,92px);font-weight:200;color:var(--bright);line-height:.95;letter-spacing:-.04em}
 .hero-s{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--sub);letter-spacing:.02em}
-
 .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:44px}
 .sc{padding:18px 0;display:flex;flex-direction:column;gap:5px;border-right:1px solid var(--line)}
 .sc:last-child{border-right:none}
@@ -123,26 +103,10 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .sc-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub)}
 .sc-val{font-family:var(--mono);font-size:20px;font-weight:300;color:var(--text);letter-spacing:-.02em}
 .sc-sub{font-family:var(--mono);font-size:9px;color:var(--muted)}
-
 .sec-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);margin-bottom:14px}
-
-/* heatmap — bleeds to edges */
-.hm-scroll-x{
-  overflow-x:auto;
-  overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-  padding-bottom:6px;
-  width:100%;
-}
+.hm-scroll-x{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;width:100%}
 .hm-scroll-x::-webkit-scrollbar{display:none}
-.hm-years{
-  display:flex;
-  gap:22px;
-  width:max-content;
-  padding:0 var(--ph);
-  margin:0 auto;
-}
+.hm-years{display:flex;gap:22px;width:max-content;padding:0 var(--ph);margin:0 auto}
 .hm-yb{display:flex;flex-direction:column;flex-shrink:0}
 .hm-ylbl{font-family:var(--mono);font-size:9px;color:var(--sub);letter-spacing:.06em;margin-bottom:7px}
 .hm-mr{position:relative;height:13px;margin-bottom:4px}
@@ -156,21 +120,20 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .hm-cell[data-l="4"]{background:rgba(232,255,110,.90)}
 .hm-cell[data-today]{outline:1.5px solid rgba(232,255,110,.5);outline-offset:1.5px}
 .hm-cell[data-future]{opacity:0;pointer-events:none}
-.hm-leg{display:flex;align-items:center;gap:6px;margin-top:10px;margin-bottom:44px}
+.hm-leg{display:flex;align-items:center;gap:6px;margin-top:10px;margin-bottom:24px}
 .hm-leg-t{font-family:var(--mono);font-size:9px;color:var(--muted)}
-
+.load-hist-btn{width:100%;height:40px;border-radius:9px;border:1px solid var(--line2);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);margin-bottom:36px;transition:border-color .15s,color .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.load-hist-btn:active{border-color:var(--mid);color:var(--text)}
+.load-hist-btn:disabled{opacity:.3;pointer-events:none}
 .rec-list{display:flex;flex-direction:column;margin-bottom:24px}
 .rec-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
 .rec-item:last-child{border-bottom:none}
 .rec-date{font-family:var(--mono);font-size:11px;color:var(--sub)}
 .rec-cnt{font-family:var(--mono);font-size:14px;color:var(--text)}
-
 .start-area{flex-shrink:0;border-top:1px solid var(--line);padding-top:16px;padding-bottom:calc(var(--sb) + 20px)}
 .start-btn{width:100%;height:58px;border-radius:13px;background:var(--accent);color:#0a0a0a;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .1s,opacity .12s}
 .start-btn:active{transform:scale(.975);opacity:.85}
 .res-hint{text-align:center;font-family:var(--mono);font-size:10px;color:var(--sub);letter-spacing:.06em;margin-top:10px;min-height:14px}
-
-/* ── counter — TRUE full viewport, no centering ── */
 #screen-counter{background:#000;touch-action:none;overflow:hidden}
 .ctr{display:flex;flex-direction:column;width:100%;height:100%}
 .ctr-bar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:calc(var(--st) + 20px) 28px 16px}
@@ -184,9 +147,6 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .ctr-foot{flex-shrink:0;display:flex;justify-content:center;align-items:center;padding-bottom:calc(var(--sb) + 24px);height:calc(var(--sb) + 56px)}
 .ctr-sync{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.1);transition:color .3s}
 .ctr-sync.syncing{color:rgba(232,255,110,.45)}
-@keyframes rout{to{transform:scale(1);opacity:0}}
-
-/* ── settings ── */
 #screen-settings{background:var(--bg)}
 .sb-bar{flex-shrink:0;border-bottom:1px solid var(--line)}
 .sb-bar-in{display:flex;align-items:center;gap:14px;padding-top:calc(var(--st) + 16px);padding-bottom:16px}
@@ -207,12 +167,8 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 .u-av{width:38px;height:38px;border-radius:50%;background:var(--bg3);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:var(--mid);flex-shrink:0;text-transform:uppercase}
 .u-name{font-family:var(--mono);font-size:13px;color:var(--text)}
 .u-tag{font-family:var(--mono);font-size:10px;color:var(--sub);margin-top:2px}
-
-/* ── toast ── */
 #toast{position:fixed;bottom:calc(var(--sb) + 80px);left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg3);border:1px solid var(--line2);border-radius:100px;padding:10px 22px;font-family:var(--mono);font-size:11px;color:var(--mid);letter-spacing:.08em;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:1000}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* ── sheet ── */
 .ovl{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;opacity:0;pointer-events:none;transition:opacity .22s;display:flex;align-items:flex-end}
 .ovl.open{opacity:1;pointer-events:all}
 .sheet{width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding:28px var(--ph) calc(var(--sb) + 28px);transform:translateY(100%);transition:transform .28s cubic-bezier(.22,.68,0,1.12);border-top:1px solid var(--line2);max-width:100%}
@@ -237,10 +193,7 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 <!-- SETUP -->
 <div class="screen" id="screen-setup" data-state="hidden">
   <div class="su-inner" style="margin:auto">
-    <div>
-      <div class="su-wm">Counter</div>
-      <h1 class="su-h">Firebase setup</h1>
-    </div>
+    <div><div class="su-wm">Counter</div><h1 class="su-h">Firebase setup</h1></div>
     <div class="su-card">
       <div class="su-ct">Step 1 — Create Firebase project</div>
       <ol>
@@ -274,10 +227,7 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 <!-- AUTH -->
 <div class="screen" id="screen-config" data-state="hidden">
   <div class="au-inner">
-    <div>
-      <div class="au-wm">Counter</div>
-      <h1 class="au-h" id="au-h">Sign in</h1>
-    </div>
+    <div><div class="au-wm">Counter</div><h1 class="au-h" id="au-h">Sign in</h1></div>
     <p class="au-sub" id="au-sub">Same account across all your devices.</p>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="field"><label class="flabel">Username</label><input class="finput" id="f-user" type="text" placeholder="yourname" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
@@ -291,10 +241,9 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 
 <!-- HOME -->
 <div class="screen" id="screen-home" data-state="hidden">
-
   <div class="hm-topbar">
     <div class="col hm-topbar-inner">
-      <span class="wordmark">Taps</span>
+      <span class="wordmark">Counter</span>
       <div class="tr">
         <div class="sync-dot" id="sync-dot"></div>
         <button class="icon-btn" id="btn-settings">
@@ -303,70 +252,37 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
       </div>
     </div>
   </div>
-
   <div class="hm-scroll">
     <div class="col">
       <div class="hero">
         <div class="hero-ey">Total all time</div>
         <div class="hero-n" id="hero-n">0</div>
-        <div class="hero-s" id="hero-s">start counting to track your Counter</div>
+        <div class="hero-s" id="hero-s">start counting to track your taps</div>
       </div>
       <div class="stats">
-        <div class="sc">
-          <div class="sc-lbl">Avg / day</div>
-          <div class="sc-val" id="s-avg">—</div>
-          <div class="sc-sub">active days</div>
-        </div>
-        <div class="sc">
-          <div class="sc-lbl">Best day</div>
-          <div class="sc-val" id="s-best">—</div>
-          <div class="sc-sub" id="s-best-d">—</div>
-        </div>
-        <div class="sc">
-          <div class="sc-lbl">Streak</div>
-          <div class="sc-val" id="s-streak">0</div>
-          <div class="sc-sub">days</div>
-        </div>
+        <div class="sc"><div class="sc-lbl">Avg / day</div><div class="sc-val" id="s-avg">—</div><div class="sc-sub">active days</div></div>
+        <div class="sc"><div class="sc-lbl">Best day</div><div class="sc-val" id="s-best">—</div><div class="sc-sub" id="s-best-d">—</div></div>
+        <div class="sc"><div class="sc-lbl">Streak</div><div class="sc-val" id="s-streak">0</div><div class="sc-sub">days</div></div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="sec-lbl">Activity</div>
-
-        <select id="year-select"
-        style="
-        background:var(--bg2);
-        border:1px solid var(--line2);
-        color:var(--text);
-        font-family:var(--mono);
-        font-size:11px;
-        padding:6px 10px;
-        border-radius:6px;
-        ">
-        </select>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="sec-lbl" style="margin-bottom:0">Activity</div>
+        <select id="year-select" style="background:var(--bg2);border:1px solid var(--line2);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;"></select>
       </div>
     </div>
-
-    <!-- heatmap bleeds full width -->
-    <div class="hm-scroll-x" id="hm-sx">
-      <div class="hm-years" id="hm-years"></div>
-    </div>
-
+    <div class="hm-scroll-x" id="hm-sx"><div class="hm-years" id="hm-years"></div></div>
     <div class="col">
       <div class="hm-leg">
         <span class="hm-leg-t">Less</span>
         <div style="display:flex;gap:3px">
-          <div class="hm-cell"></div>
-          <div class="hm-cell" data-l="1"></div>
-          <div class="hm-cell" data-l="2"></div>
-          <div class="hm-cell" data-l="3"></div>
-          <div class="hm-cell" data-l="4"></div>
+          <div class="hm-cell"></div><div class="hm-cell" data-l="1"></div><div class="hm-cell" data-l="2"></div><div class="hm-cell" data-l="3"></div><div class="hm-cell" data-l="4"></div>
         </div>
         <span class="hm-leg-t">More</span>
       </div>
+      <button class="load-hist-btn" id="btn-load-hist">Load full history</button>
       <div class="sec-lbl">Recent</div>
       <div class="rec-list" id="rec-list"></div>
     </div>
   </div>
-
   <div class="start-area">
     <div class="col">
       <button class="start-btn" id="btn-start">
@@ -390,22 +306,7 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
       <div class="ctr-hint">tap anywhere</div>
     </div>
     <div class="ctr-foot">
-      <button id="btn-ninja"
-      style="
-      position:absolute;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      width:36px;
-      height:36px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.12);
-      background:transparent;
-      color:rgba(255,255,255,.4);
-      font-size:12px;
-      ">
-      ◉
-      </button>
+      <button id="btn-ninja" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.4);font-size:12px;">◉</button>
       <div class="ctr-sync" id="ctr-sync">synced</div>
     </div>
   </div>
@@ -415,9 +316,7 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
 <div class="screen" id="screen-settings" data-state="hidden">
   <div class="sb-bar">
     <div class="col sb-bar-in">
-      <button class="back-btn" id="btn-back">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L4 7l5 5"/></svg>
-      </button>
+      <button class="back-btn" id="btn-back"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2L4 7l5 5"/></svg></button>
       <span class="sb-title">Settings</span>
     </div>
   </div>
@@ -429,28 +328,16 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
           <div class="u-av" id="s-av">—</div>
           <div><div class="u-name" id="s-un">—</div><div class="u-tag">signed in</div></div>
         </div>
-        <div class="srow" id="btn-signout">
-          <span class="srow-l">Sign out</span>
-          <span class="srow-v danger">→</span>
-        </div>
+        <div class="srow" id="btn-signout"><span class="srow-l">Sign out</span><span class="srow-v danger">→</span></div>
       </div>
       <div class="sg">
         <div class="sg-lbl">Data</div>
-        <div class="srow" id="btn-export">
-          <span class="srow-l">Export data</span>
-          <span class="srow-v">JSON →</span>
-        </div>
+        <div class="srow" id="btn-export"><span class="srow-l">Export data</span><span class="srow-v">JSON →</span></div>
       </div>
       <div class="sg">
         <div class="sg-lbl">Config</div>
-        <div class="srow" id="btn-reconfig">
-          <span class="srow-l">Change Firebase config</span>
-          <span class="srow-v">Edit →</span>
-        </div>
-        <div class="srow" style="cursor:default">
-          <span class="srow-l">Version</span>
-          <span class="srow-v">2.0.0</span>
-        </div>
+        <div class="srow" id="btn-reconfig"><span class="srow-l">Change Firebase config</span><span class="srow-v">Edit →</span></div>
+        <div class="srow" style="cursor:default"><span class="srow-l">Version</span><span class="srow-v">4.0.0</span></div>
       </div>
     </div>
   </div>
@@ -468,62 +355,38 @@ input{font-family:var(--mono);outline:none;border:none;background:none;color:var
   </div>
 </div>
 
+<div id="hm-tip" style="position:fixed;pointer-events:none;background:#111;border:1px solid #222;border-radius:8px;padding:8px 10px;font-family:var(--mono);opacity:0;transition:opacity .12s;z-index:1000;">
+  <div id="hm-tip-val" style="font-size:14px;color:white;line-height:1;"></div>
+  <div id="hm-tip-date" style="font-size:10px;color:#777;margin-top:2px;"></div>
+</div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const tip=document.getElementById('hm-tip')
-const tipVal=document.getElementById('hm-tip-val')
-const tipDate=document.getElementById('hm-tip-date')
-let ninja=false
-function showTip(x,y,val,date){
-  tipVal.textContent=val
-  tipDate.textContent=date
-
-  tip.style.left=(x+12)+'px'
-  tip.style.top=(y-28)+'px'
-  tip.style.opacity=1
-}
-
-function hideTip(){
-  tip.style.opacity=0
-}
-
-const ninjaBtn=document.getElementById('btn-ninja')
-
-ninjaBtn.onclick=()=>{
-
-  ninja=!ninja
-
-  const num=document.getElementById('ctr-num')
-  const done=document.getElementById('btn-done')
-
-  if(ninja){
-    num.style.opacity=0
-    done.style.opacity=0
-    done.style.pointerEvents="none"
-
-  }else{
-    num.style.opacity=1
-    done.style.opacity=1
-    done.style.pointerEvents="auto"
-  }
-
-}
-
-const CFG_KEY='taps_cfg_v2', SESS_KEY='taps_sess_v2';
-const MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const CFG_KEY   = 'taps_cfg_v2';
+const CACHE_KEY = 'taps_cache_v4';
+const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function lcfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY))||null}catch{return null}}
 function scfg(c){try{localStorage.setItem(CFG_KEY,JSON.stringify(c))}catch{}}
 function ccfg(){try{localStorage.removeItem(CFG_KEY)}catch{}}
 
 let fb=null,auth=null,db=null,cu=null,cun=null;
-let cache={days:{},total:0};
-let sess={count:0,startedDate:null};
-let st=null;
+
+// Single source of truth.
+// cache.days[dateKey] = total taps for that day
+// cache.total = sum of all days
+// cache.fullLoaded = true once full Firestore history has been fetched
+let cache={days:{},total:0,fullLoaded:false};
+
+let sessionDate=null; // locked when counter opens, never changes mid-session
+let _saveTimer=null;
+let _syncInterval=null;
+let _pt=null;
+let _th=false;
+let ninja=false;
 
 function tkey(){const d=new Date();return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`}
 function p2(n){return String(n).padStart(2,'0')}
@@ -534,9 +397,28 @@ function rd(k){
   const df=Math.round((now-dt)/86400000);
   return df===0?'Today':df===1?'Yesterday':dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
-function ssess(){try{localStorage.setItem(SESS_KEY,JSON.stringify(sess))}catch{}}
-function lsess(){try{const r=localStorage.getItem(SESS_KEY);if(r){const s=JSON.parse(r);if(s&&typeof s.count==='number')sess=s}}catch{}}
-function csess(){try{localStorage.removeItem(SESS_KEY)}catch{}}
+
+// debounced — writes cache to localStorage 1s after last tap
+function saveCache(){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache))}
+    catch(e){console.error('localStorage save failed',e)}
+  },1000);
+}
+
+function loadCache(){
+  try{
+    const r=localStorage.getItem(CACHE_KEY);
+    if(r){
+      const p=JSON.parse(r);
+      if(p&&p.days){
+        cache=p;
+        cache.total=Object.values(cache.days).reduce((a,b)=>a+b,0);
+      }
+    }
+  }catch(e){console.error('localStorage load failed',e)}
+}
 
 let _tt;
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),2400)}
@@ -600,7 +482,8 @@ async function doAuth(){
   try{
     const em=u2email(u);
     const r=amode==='signin'?await signInWithEmailAndPassword(auth,em,p):await createUserWithEmailAndPassword(auth,em,p);
-    cu=r.user;cun=u;await afterLogin();
+    cu=r.user;cun=u;
+    await afterLogin();
   }catch(err){
     let msg=err.message||'Something went wrong.';
     if(msg.includes('user-not-found')||msg.includes('wrong-password')||msg.includes('invalid-credential'))msg='Wrong username or password.';
@@ -611,148 +494,195 @@ async function doAuth(){
   }
 }
 
-async function afterLogin(){lsess();await pull();renderHome();hideLoad();show('home')}
+async function afterLogin(){
+  loadCache();       // instant — full history from localStorage
+  await pullToday(); // 1 Firestore read — only today
+  renderHome();
+  hideLoad();
+  show('home');
+}
 
-async function pull(){
+// ── CHEAP: 1 read, only today ──
+async function pullToday(){
+  if(!db||!cu)return;
+  setSS('syncing');
+  try{
+    const dk=tkey();
+    const snap=await getDoc(doc(db,'taps',cu.uid,'days',dk));
+    if(snap.exists()){
+      const c=Number(snap.data().count)||0;
+      // Firestore wins only if it has more (protects local taps)
+      if(c>(cache.days[dk]||0)){
+        cache.days[dk]=c;
+        cache.total=Object.values(cache.days).reduce((a,b)=>a+b,0);
+        saveCache();
+      }
+    }
+    setSS('synced');
+  }catch(e){console.error(e);setSS('error')}
+}
+
+// ── EXPENSIVE: all reads, only on demand ──
+async function pullAll(){
   if(!db||!cu)return;
   setSS('syncing');
   try{
     const snap=await getDocs(collection(db,'taps',cu.uid,'days'));
-    const days={};let total=0;
-    snap.forEach(d=>{const c=Number(d.data().count)||0;days[d.id]=c;total+=c});
-    cache.days=days;cache.total=total;setSS('synced');
-  }catch(e){console.error(e);setSS('error')}
+    snap.forEach(d=>{
+      const c=Number(d.data().count)||0;
+      if(c>(cache.days[d.id]||0)) cache.days[d.id]=c;
+    });
+    cache.total=Object.values(cache.days).reduce((a,b)=>a+b,0);
+    cache.fullLoaded=true;
+    saveCache();
+    setSS('synced');
+  }catch(e){console.error(e);setSS('error');toast('Could not load history')}
 }
 
 async function push(dk,count){
   if(!db||!cu||count<=0)return;
   setSS('syncing');
-  try{await setDoc(doc(db,'taps',cu.uid,'days',dk),{count});setSS('synced')}
-  catch(e){console.error(e);setSS('error');toast('Sync failed — saved locally')}
+  try{
+    await setDoc(doc(db,'taps',cu.uid,'days',dk),{count});
+    setSS('synced');
+  }catch(e){console.error(e);setSS('error');toast('Sync failed — saved locally')}
 }
 
 function setSS(s){
   document.getElementById('sync-dot').className='sync-dot '+s;
-  const sl=document.getElementById('ctr-sync');sl.className='ctr-sync '+(s==='syncing'?'syncing':'');
+  const sl=document.getElementById('ctr-sync');
+  sl.className='ctr-sync '+(s==='syncing'?'syncing':'');
   sl.textContent=s==='syncing'?'syncing…':s==='error'?'sync error':'synced';
 }
 
-function schedSync(){clearTimeout(st);st=setTimeout(()=>ssess(),5000)}
+// ── load history button ──
+document.getElementById('btn-load-hist').onclick=async()=>{
+  if(cache.fullLoaded){toast('History already loaded');return}
+  const btn=document.getElementById('btn-load-hist');
+  btn.disabled=true;btn.textContent='Loading…';
+  await pullAll();
+  renderHome();
+  toast('Full history loaded');
+};
 
+// ── home ──
 function renderHome(){
-  const today=tkey();
-  const vd={...cache.days};
-  if(sess.count>0){const k=sess.startedDate||today;vd[k]=(vd[k]||0)+sess.count}
-  const vt=cache.total+sess.count;
+  const vd=cache.days;
+  const vt=cache.total;
   const active=Object.keys(vd).filter(k=>vd[k]>0);
   const nd=active.length;
+
   document.getElementById('hero-n').textContent=fmt(vt);
   document.getElementById('hero-s').textContent=nd>0?`across ${nd} active day${nd>1?'s':''}`:'start counting to track your taps';
+
   const avg=nd>0?Math.round(vt/nd):null;
   document.getElementById('s-avg').textContent=avg!=null?fmt(avg):'—';
-  let bk=null,bv=0;active.forEach(k=>{if(vd[k]>bv){bv=vd[k];bk=k}});
+
+  let bk=null,bv=0;
+  active.forEach(k=>{if(vd[k]>bv){bv=vd[k];bk=k}});
   document.getElementById('s-best').textContent=bk?fmt(bv):'—';
   document.getElementById('s-best-d').textContent=bk?rd(bk):'—';
   document.getElementById('s-streak').textContent=streak(vd);
-  document.getElementById('btn-start-lbl').textContent=sess.count>0?'Resume':'Start Counting';
-  document.getElementById('res-hint').textContent=sess.count>0?`${fmt(sess.count)} in progress`:'';
-  populateYears(vd)
-  renderHM(vd);renderRec(vd);
+
+  const inSession=sessionDate!==null;
+  document.getElementById('btn-start-lbl').textContent=inSession?'Resume':'Start Counting';
+  document.getElementById('res-hint').textContent=inSession?'session in progress':'';
+
+  // update load history button
+  const lhb=document.getElementById('btn-load-hist');
+  if(cache.fullLoaded){lhb.textContent='History loaded ✓';lhb.disabled=true}
+  else{lhb.textContent='Load full history';lhb.disabled=false}
+
+  populateYears(vd);
+  renderHM(vd);
+  renderRec(vd);
 }
 
 function streak(vd){
   let s=0;const d=new Date();d.setHours(0,0,0,0);
-  while(true){const k=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;if(vd[k]>0){s++;d.setDate(d.getDate()-1)}else break}
+  while(true){
+    const k=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+    if(vd[k]>0){s++;d.setDate(d.getDate()-1)}else break;
+  }
   return s;
 }
 
-function renderHM(vd, selectedYear=null){
+const tip=document.getElementById('hm-tip');
+const tipVal=document.getElementById('hm-tip-val');
+const tipDate=document.getElementById('hm-tip-date');
+function showTip(x,y,val,date){tipVal.textContent=val;tipDate.textContent=date;tip.style.left=(x+12)+'px';tip.style.top=(y-28)+'px';tip.style.opacity=1}
+function hideTip(){tip.style.opacity=0}
+
+function renderHM(vd,selectedYear=null){
   const wrap=document.getElementById('hm-years');wrap.innerHTML='';
-  const today=new Date();today.setHours(0,0,0,0);const todayStr=tkey();
-  const keys=Object.keys(vd).filter(k=>vd[k]>0);
-  const fy=2025
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayStr=tkey();
   const cy=today.getFullYear();
   const mx=Math.max(...Object.values(vd).filter(v=>v>0),1);
-  const year = selectedYear || cy;
-  {
-    const blk=document.createElement('div');blk.className='hm-yb';
-    const yl=document.createElement('div');yl.className='hm-ylbl';yl.textContent=String(year);blk.appendChild(yl);
-    const mr=document.createElement('div');mr.className='hm-mr';blk.appendChild(mr);
-    const gd=document.createElement('div');gd.className='hm-g';blk.appendChild(gd);
-    const j=new Date(year,0,1);const st2=new Date(j);st2.setDate(st2.getDate()-st2.getDay());
-    const ye=year<cy?new Date(year,11,31):today;const en=new Date(ye);en.setDate(en.getDate()+(6-en.getDay()));
-    const tw=Math.ceil((en-st2)/86400000/7)+1;
-    let lm=-1;
-    for(let w=0;w<tw;w++){
-      const col=document.createElement('div');col.className='hm-c';
-      for(let d2=0;d2<7;d2++){
-        const dt=new Date(st2);dt.setDate(dt.getDate()+w*7+d2);
-        const k=`${dt.getFullYear()}-${p2(dt.getMonth()+1)}-${p2(dt.getDate())}`;
-        if(d2===0&&dt.getMonth()!==lm&&dt.getFullYear()===year){
-          lm=dt.getMonth();
-          const ml=document.createElement('span');ml.className='hm-ml';ml.textContent=MO[lm];ml.style.left=(w*15)+'px';mr.appendChild(ml);
-        }
-        const cell=document.createElement('div');cell.className='hm-cell';
-        const cnt=vd[k]||0;const fut=dt>today;const out=dt.getFullYear()!==year;
-        if(fut||out){cell.dataset.future=''}
-        else if(cnt>0){cell.dataset.l=cnt<mx*.25?1:cnt<mx*.5?2:cnt<mx*.75?3:4}
-        if(k===todayStr)cell.dataset.today='';
-        if(!fut && !out){
-          const val=cnt>0?fmt(cnt):'0'
-          const date=rd(k)
+  const year=selectedYear||cy;
 
-          cell.onmousemove=(e)=>{
-            showTip(e.clientX,e.clientY,val,date)
-          }
+  const blk=document.createElement('div');blk.className='hm-yb';
+  const yl=document.createElement('div');yl.className='hm-ylbl';yl.textContent=String(year);blk.appendChild(yl);
+  const mr=document.createElement('div');mr.className='hm-mr';blk.appendChild(mr);
+  const gd=document.createElement('div');gd.className='hm-g';blk.appendChild(gd);
 
-          cell.onmouseleave=hideTip
-        }
-        if(!fut && !out){
-          cell.style.cursor='pointer'
-          cell.onclick=()=>{
-            const val=prompt(`Edit taps for ${k}`,vd[k]||0)
-            if(val===null) return
+  const j=new Date(year,0,1);
+  const st2=new Date(j);st2.setDate(st2.getDate()-st2.getDay());
+  const ye=year<cy?new Date(year,11,31):today;
+  const en=new Date(ye);en.setDate(en.getDate()+(6-en.getDay()));
+  const tw=Math.ceil((en-st2)/86400000/7)+1;
+  let lm=-1;
 
-            const num=parseInt(val)||0
-
-            cache.days[k]=num
-
-            cache.total=Object.values(cache.days).reduce((a,b)=>a+b,0)
-
-            renderHome()
-
-            if(cu){
-              setDoc(doc(db,'taps',cu.uid,'days',k),{count:num})
-            }
-          }
-        }
-        col.appendChild(cell);
+  for(let w=0;w<tw;w++){
+    const col=document.createElement('div');col.className='hm-c';
+    for(let d2=0;d2<7;d2++){
+      const dt=new Date(st2);dt.setDate(dt.getDate()+w*7+d2);
+      const k=`${dt.getFullYear()}-${p2(dt.getMonth()+1)}-${p2(dt.getDate())}`;
+      if(d2===0&&dt.getMonth()!==lm&&dt.getFullYear()===year){
+        lm=dt.getMonth();
+        const ml=document.createElement('span');ml.className='hm-ml';ml.textContent=MO[lm];ml.style.left=(w*15)+'px';mr.appendChild(ml);
       }
-      gd.appendChild(col);
+      const cell=document.createElement('div');cell.className='hm-cell';
+      const cnt=vd[k]||0;
+      const fut=dt>today;
+      const out=dt.getFullYear()!==year;
+      if(fut||out){cell.dataset.future=''}
+      else if(cnt>0){cell.dataset.l=cnt<mx*.25?1:cnt<mx*.5?2:cnt<mx*.75?3:4}
+      if(k===todayStr)cell.dataset.today='';
+      if(!fut&&!out){
+        const val=cnt>0?fmt(cnt):'0';
+        const date=rd(k);
+        cell.onmousemove=(e)=>showTip(e.clientX,e.clientY,val,date);
+        cell.onmouseleave=hideTip;
+        cell.style.cursor='pointer';
+        cell.onclick=()=>{
+          const val=prompt(`Edit taps for ${k}`,vd[k]||0);
+          if(val===null)return;
+          const num=parseInt(val)||0;
+          cache.days[k]=num;
+          cache.total=Object.values(cache.days).reduce((a,b)=>a+b,0);
+          saveCache();
+          renderHome();
+          if(cu) push(k,num);
+        };
+      }
+      col.appendChild(cell);
     }
-    wrap.appendChild(blk);
+    gd.appendChild(col);
   }
+  wrap.appendChild(blk);
   requestAnimationFrame(()=>{const s=document.getElementById('hm-sx');if(s)s.scrollLeft=s.scrollWidth});
 }
 
 function populateYears(vd){
-  const sel=document.getElementById('year-select')
-  sel.innerHTML=''
-
-  const cy=new Date().getFullYear()
-
-  for(let y=cy; y>=2025; y--){
-    const o=document.createElement('option')
-    o.value=y
-    o.textContent=y
-    sel.appendChild(o)
+  const sel=document.getElementById('year-select');
+  sel.innerHTML='';
+  const cy=new Date().getFullYear();
+  for(let y=cy;y>=2025;y--){
+    const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);
   }
-
-  sel.value=cy
-
-  sel.onchange=()=>{
-    renderHM(vd,parseInt(sel.value))
-  }
+  sel.value=cy;
+  sel.onchange=()=>renderHM(vd,parseInt(sel.value));
 }
 
 function renderRec(vd){
@@ -762,60 +692,62 @@ function renderRec(vd){
   list.innerHTML=entries.map(([k,v])=>`<div class="rec-item"><span class="rec-date">${rd(k)}</span><span class="rec-cnt">${fmt(v)}</span></div>`).join('');
 }
 
-let _pt=null,_th=false;
-let _todayBase = 0;
-let _syncInterval = null;
-
+// ── counter ──
 function openCtr(){
-  if(!sess.startedDate) sess.startedDate = tkey();
-  _todayBase = cache.days[sess.startedDate] || 0;
-  const now = new Date();
-  document.getElementById('ctr-date').textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-  document.getElementById('ctr-num').textContent = fmt(_todayBase + sess.count);
+  if(!sessionDate) sessionDate=tkey();
+  const now=new Date();
+  document.getElementById('ctr-date').textContent=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('ctr-num').textContent=fmt(cache.days[sessionDate]||0);
   show('counter');
-  _syncInterval = setInterval(async()=>{
-    if(sess.count > 0){
-      const dk = sess.startedDate || tkey();
-      const nc = (cache.days[dk] || 0) + sess.count;
-      await push(dk, nc);
-      ssess();
-    }
-  }, 60000);
+  clearInterval(_syncInterval);
+  _syncInterval=setInterval(async()=>{
+    const current=cache.days[sessionDate]||0;
+    if(current>0) await push(sessionDate,current);
+  },60000);
 }
 
 const tz=document.getElementById('tap-zone');
 tz.addEventListener('touchstart',onTap,{passive:false});
-tz.addEventListener('mousedown',e=>{if(_th)return;tap(1,e.clientX,e.clientY)});
+tz.addEventListener('mousedown',e=>{if(_th)return;tap(e.clientX,e.clientY)});
 tz.addEventListener('touchstart',()=>{_th=true},{passive:true});
 tz.addEventListener('touchend',()=>{setTimeout(()=>{_th=false},400)},{passive:true});
 
-function onTap(e) { e.preventDefault(); const t = e.changedTouches; tap(1, t[0].clientX, t[0].clientY) }
+function onTap(e){e.preventDefault();tap(e.changedTouches[0].clientX,e.changedTouches[0].clientY)}
 
-function tap(n,x,y){
-  sess.count+=n;
+function tap(x,y){
+  if(!sessionDate) sessionDate=tkey();
+  cache.days[sessionDate]=(cache.days[sessionDate]||0)+1;
+  cache.total=(cache.total||0)+1;
   const el=document.getElementById('ctr-num');
   el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');
   clearTimeout(_pt);_pt=setTimeout(()=>el.classList.remove('pulse'),80);
-  el.textContent = fmt(_todayBase + sess.count);  
-  schedSync();
+  el.textContent=fmt(cache.days[sessionDate]);
+  saveCache();
 }
 
 document.getElementById('btn-done').onclick=async()=>{
   clearInterval(_syncInterval);_syncInterval=null;
-  clearTimeout(st);
-  if(sess.count===0){sess={count:0,startedDate:null};csess();show('home');renderHome();return}
-  const dk=sess.startedDate||tkey();const delta=sess.count;
-  const nc=(cache.days[dk]||0)+delta;
-  cache.days[dk]=nc;cache.total=(cache.total||0)+delta;
-  sess={count:0,startedDate:null};csess();
-  show('home');renderHome();toast(`+${fmt(delta)} saved`);
-  await push(dk,nc);
+  const dk=sessionDate||tkey();
+  const total=cache.days[dk]||0;
+  if(total>0) await push(dk,total);
+  sessionDate=null;
+  show('home');
+  renderHome();
+  toast('Saved');
+};
+
+document.getElementById('btn-ninja').onclick=()=>{
+  ninja=!ninja;
+  const num=document.getElementById('ctr-num');
+  const done=document.getElementById('btn-done');
+  num.style.opacity=ninja?0:1;
+  done.style.opacity=ninja?0:1;
+  done.style.pointerEvents=ninja?'none':'auto';
 };
 
 document.getElementById('btn-settings').onclick=()=>{
-  const u=cun||'—';
-  document.getElementById('s-un').textContent=u;
-  document.getElementById('s-av').textContent=u.charAt(0).toUpperCase();
+  document.getElementById('s-un').textContent=cun||'—';
+  document.getElementById('s-av').textContent=(cun||'—').charAt(0).toUpperCase();
   show('settings');
 };
 document.getElementById('btn-back').onclick=()=>{show('home');renderHome()};
@@ -823,7 +755,12 @@ document.getElementById('btn-start').onclick=openCtr;
 
 document.getElementById('btn-signout').onclick=()=>{
   sheet('Sign out','Sign back in anytime with your username and password.','Sign Out',false,async()=>{
-    await signOut(auth);cache={days:{},total:0};sess={count:0,startedDate:null};csess();cu=null;cun=null;show('config');
+    clearInterval(_syncInterval);_syncInterval=null;
+    await signOut(auth);
+    cache={days:{},total:0,fullLoaded:false};
+    sessionDate=null;cu=null;cun=null;
+    try{localStorage.removeItem(CACHE_KEY)}catch{}
+    show('config');
   });
 };
 
@@ -846,41 +783,27 @@ function hideLoad(){
   clearTimeout(_safety);
   document.getElementById('loading').classList.add('out');
 }
-document.getElementById('loading').addEventListener('transitionend',()=>{document.getElementById('loading').style.display='none'});
+document.getElementById('loading').addEventListener('transitionend',()=>{
+  document.getElementById('loading').style.display='none';
+});
 
-
-async function init(){ const cfg=lcfg(); if(!cfg){hideLoad();show('setup');return} if(!initFB(cfg)){hideLoad();show('setup');document.getElementById('su-err').textContent='Saved config invalid. Re-enter your keys.';return} onAuthStateChanged(auth,async user=>{ if(user){cu=user;cun=email2u(user.email);lsess();await pull();renderHome();hideLoad();show('home')} else{hideLoad();show('config')} }); document.addEventListener('visibilitychange',async()=>{ if(document.visibilityState==='visible'&&cu){await pull();renderHome()} }); }
+async function init(){
+  const cfg=lcfg();
+  if(!cfg){hideLoad();show('setup');return}
+  if(!initFB(cfg)){hideLoad();show('setup');document.getElementById('su-err').textContent='Saved config invalid. Re-enter your keys.';return}
+  onAuthStateChanged(auth,async user=>{
+    if(user){cu=user;cun=email2u(user.email);await afterLogin()}
+    else{hideLoad();show('config')}
+  });
+  // only refresh today on foreground, skip if session is active
+  document.addEventListener('visibilitychange',async()=>{
+    if(document.visibilityState==='visible'&&cu&&sessionDate===null){
+      await pullToday();renderHome();
+    }
+  });
+}
 
 init();
 </script>
-<div id="hm-tip"
-style="
-position:fixed;
-pointer-events:none;
-background:#111;
-border:1px solid #222;
-border-radius:8px;
-padding:8px 10px;
-font-family:var(--mono);
-opacity:0;
-transition:opacity .12s;
-z-index:1000;
-">
-
-<div id="hm-tip-val"
-style="
-font-size:14px;
-color:white;
-line-height:1;
-"></div>
-
-<div id="hm-tip-date"
-style="
-font-size:10px;
-color:#777;
-margin-top:2px;
-"></div>
-
-</div>
 </body>
 </html>
